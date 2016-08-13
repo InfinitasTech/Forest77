@@ -8,6 +8,7 @@ class ProjectManageController < ApplicationController
 	end
 
 	def create
+		# TODO
 		p = ProjectHeader.new
 		if ProjectHeader.last.present? then
 			pid = ProjectHeader.last.id

@@ -7,6 +7,11 @@ class ProjectDatabaseController < ApplicationController
 
 	end
 
+	def create_table
+		
+	end
+
+
 	def project_select
 		@project = ProjectHeader.find_by_id(params[:id])
 		unless @project.present?
