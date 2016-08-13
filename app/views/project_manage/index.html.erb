@@ -1,0 +1,18 @@
+<section>
+	<h1>Project Manage</h1>
+	<a href="<%=url_for :action=>:create %>" class="btn btn-default" >Create Project</a>
+	<% unless @projects.present? then %>
+		<hr />
+		There is no any project.
+	<% else %>
+		<br /><br />
+		<table class="table" >
+			<% @projects.each do |record| %>
+				<tr>
+					<td><%=record.name%></td>
+					<td><a href="<%=url_for :controller=>:project_database, :action=>:project_select, :id=>record.id %>" class="btn btn-default" >DB View</td>
+				</tr>
+			<% end %>
+		</table>
+	<% end %>
+</section>

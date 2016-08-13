@@ -1,0 +1,10 @@
+<%
+flash[:msg] = flash[:message] unless flash[:msg].present?
+flash[:error] = flash[:err] unless flash[:error].present?
+if flash[:error].present? then
+	%><div class="alert alert-danger"><%=flash[:error]%></div><%
+end
+if flash[:msg]..present? then
+	%><div class="alert alert-info"><%=flash[:msg]%></div><%
+end
+%>
