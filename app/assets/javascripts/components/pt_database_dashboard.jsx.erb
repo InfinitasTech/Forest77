@@ -1,4 +1,4 @@
-var panelHandleMouseMove = false;
+var panelHandleMouseMove = false, panelHandleMouseUp = false;
 
 
 var PT_Database_TableBox_Btn = React.createClass({
@@ -6,9 +6,16 @@ var PT_Database_TableBox_Btn = React.createClass({
 		var style = {
 			fill: 'rgb(240, 240, 255)',
 			width: 10,
-			height: 10
+			height: 10,
+			cursor: this.props.cursor || 'pointer'
 		};
-		return (<rect x={this.props.x} y={this.props.y} style={style}></rect>);
+		return (<rect x={this.props.x} y={this.props.y} style={style}
+			onClick={this.props.onClick}
+			onMouseDown={this.props.onMouseDown}
+			onMouseMove={this.props.onMouseMove}
+			onMouseUp={this.props.onMouseUp}
+			onMouseOut={this.props.onMouseOut}
+			></rect>);
 	}
 });
 
@@ -17,12 +24,61 @@ var PT_Database_TableBox = React.createClass({
 		return {
 			canEdit : this.props.canEdit || false,
 			loading : true,
+			inDragMode: false,
+			savePosition : false,
 			x : this.props.data.x || 0,
 			y : this.props.data.y || 0
 		};
 	},
 	loadData : function(){
 
+	},
+	handleMouseMove : function(e){
+		if(! this.inDragMode){
+			return
+		}
+		var diffX = e.pageX - this.actionX;
+		this.actionX = e.pageX;
+		if(diffX!=0){
+			var x = this.state.x + diffX;
+			this.setState({ x : x})
+		}
+		var diffY = e.pageY - this.actionY;
+		this.actionY = e.pageY;
+		if(diffY!=0){
+			var y = this.state.y + diffY;
+			this.setState({ y : y})
+		}
+	},
+	handleMouseDown : function(e){
+		this.inDragMode = true;
+		this.actionX = e.pageX;
+		this.actionY = e.pageY;
+	},
+	handleMouseUp : function(e){
+		this.inDragMode = false;
+		panelHandleMouseMove = false;
+		this.needSavePosition = true;
+		this.setState({
+			savePosition : true
+		})
+	},
+	handleMouseOut : function(e){
+		panelHandleMouseMove = this.handleMouseMove;
+	},
+	handleNewColumnClick : function(e){
+		var data = this.props.data
+		var modal = $('#modal_table_column');
+		modal.find('.modal-title').text('New Column');
+		modal.find('[name=table_id]').val(data.id);
+		modal.modal('show');
+	},
+	handleSavePosition : function(){
+		apiCall(api_save_table_position, {
+			table_id : this.props.data.id,
+			x: this.state.x,
+			y: this.state.y
+		}, function(resp){ });
 	},
 	render : function(){
 		var transform = 'translate('+this.state.x+', ' + this.state.y + ')';
@@ -38,14 +94,23 @@ var PT_Database_TableBox = React.createClass({
 		// 		<text y={20} >Loading</text>
 		// 	</g>)
 		// }
-		return (<g transform={transform}>
+		if(this.state.savePosition){
+			this.handleSavePosition();
+		}
+		return (<g transform={transform}
+				onMouseMove={this.handleMouseMove}
+				onMouseUp={this.handleMouseUp}
+				onMouseOut={this.handleMouseOut}
+				>
 				<rect style={style}></rect>
 				<PT_Database_TableBox_Btn
 					data={this.props.data}
-					x={1} y={1} title="Move" />
+					x={1} y={1} title="Move" cursor="move"
+					onMouseDown={this.handleMouseDown} />
 				<PT_Database_TableBox_Btn
 					data={this.props.data}
-					x={12} y={1} title="Add" />
+					x={12} y={1} title="Add"
+					onClick={this.handleNewColumnClick} />
 			</g>)
 	}
 })
@@ -85,6 +150,9 @@ var PT_Database_Dashboard = React.createClass({
 				loading: false
 			});
 		}, this);
+	},
+	updateURLHash : function(){
+
 	},
 	getTables : function(){
 		return this.state.records.map(function(record){
@@ -160,7 +228,11 @@ var PT_Database_Dashboard = React.createClass({
 		var contents = this.getTables();
 		var transform = 'translate('+this.state.x+', ' + this.state.y + ')';
 		return (<div>
-			<svg width={panel_width} height={panel_height} style={styleSvg} >
+			<svg width={panel_width} height={panel_height} style={styleSvg} 
+				onMouseDown={this.handleMouseDown}
+				onMouseMove={this.handleMouseMove}
+				onMouseUp={this.handleMouseUp}
+				onMouseOut={this.handleMouseOut} >
 				<g transform={transform} >
 					{contents}
 				</g>
