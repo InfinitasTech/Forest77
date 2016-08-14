@@ -16,6 +16,7 @@ class ProjectManageController < ApplicationController
 			pid = 0
 		end
 		p.name = 'TEST-' + pid.to_s
+		p.initProject
 		p.save!
 		redirect_to :action=>:index
 	end

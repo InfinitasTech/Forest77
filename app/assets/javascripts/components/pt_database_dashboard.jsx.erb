@@ -1,5 +1,170 @@
+var panelHandleMouseMove = false;
+
+
+var PT_Database_TableBox_Btn = React.createClass({
+	render : function(){
+		var style = {
+			fill: 'rgb(240, 240, 255)',
+			width: 10,
+			height: 10
+		};
+		return (<rect x={this.props.x} y={this.props.y} style={style}></rect>);
+	}
+});
+
+var PT_Database_TableBox = React.createClass({
+	getInitialState : function(){
+		return {
+			canEdit : this.props.canEdit || false,
+			loading : true,
+			x : this.props.data.x || 0,
+			y : this.props.data.y || 0
+		};
+	},
+	loadData : function(){
+
+	},
+	render : function(){
+		var transform = 'translate('+this.state.x+', ' + this.state.y + ')';
+		var style = {
+			fill: 'rgb(240, 255, 230)',
+			width: 100,
+			height: 100
+		};
+
+		// if(this.state.loading){
+		// 	this.loadData();
+		// 	return (<g transform={transform}>
+		// 		<text y={20} >Loading</text>
+		// 	</g>)
+		// }
+		return (<g transform={transform}>
+				<rect style={style}></rect>
+				<PT_Database_TableBox_Btn
+					data={this.props.data}
+					x={1} y={1} title="Move" />
+				<PT_Database_TableBox_Btn
+					data={this.props.data}
+					x={12} y={1} title="Add" />
+			</g>)
+	}
+})
 var PT_Database_Dashboard = React.createClass({
+	getInitialState: function(){
+		$(window).resize(this.onWindowSizeChange);
+		$(window).keydown(this.handleKeydown);
+		$(window).keyup(this.handleKeyup);
+		taskPanel = this;
+
+		return {
+			hookWindowSize : false,
+			width : $('#page_body').width() - 38,
+			height : 600,
+			loading : true,
+			x: 0,
+			y: 0
+		}
+	},
+	hookWindowSize : function(){
+		$(window).resize(this._hookWindowSize);
+		this.setState({
+			hookWindowSize : true
+		});
+	},
+	_hookWindowSize : function(){
+		this.setState({
+			width : $('#page_body').width() - 38
+		});
+	},
+	loadData : function(){
+		apiCall(api_load_table, {
+			uuid : uuid()
+		}, function(resp){
+			this.setState({
+				records : resp.records,
+				loading: false
+			});
+		}, this);
+	},
+	getTables : function(){
+		return this.state.records.map(function(record){
+			var key = 'tabh_k_' + record.id;
+			return (<PT_Database_TableBox data={record}
+				key={key}
+				canEdit={this.props.canEdit}
+				></PT_Database_TableBox>);
+		}.bind(this));
+	},
+	handleMouseMove : function(e){
+		if(panelHandleMouseMove){
+			panelHandleMouseMove(e);
+		}
+	},
+	spaceDragMove : function(e){
+		var diffX = e.pageX - this.actionX;
+		this.actionX = e.pageX;
+		var x = this.state.x + diffX;
+		var diffY = e.pageY - this.actionY;
+		this.actionY = e.pageY;
+		var y = this.state.y + diffY;
+		this.setState({
+			x: x,
+			y: y
+		});
+	},
+	handleMouseDown : function(e){
+		if(this.inDragMode){
+			this.actionX = e.pageX;
+			this.actionY = e.pageY;
+			panelHandleMouseMove = this.spaceDragMove;
+		}
+	},
+	handleMouseUp : function(e){
+		panelHandleMouseMove = false;
+		if(panelHandleMouseUp){
+			panelHandleMouseUp(e);
+		}
+		this.updateURLHash();
+	},
+	handleMouseOut : function(e){
+		// panelHandleMouseMove = false;
+	},
+	handleKeydown : function(e){
+		if(!this.state.canEdit){ return; }
+		var code = event.which || event.keyCode;
+		if(code==32){
+			$('#svg_task_panel').css('cursor', 'move');
+			this.inDragMode = true;
+		}
+	},
+	handleKeyup : function(e){
+		if(!this.state.canEdit){ return; }
+		this.inDragMode = false;
+		$('#svg_task_panel').css('cursor', '');
+	},
 	render: function(){
-		return (<div>Here is it.</div>);
+		var panel_width = this.state.width;
+		var panel_height = this.state.height;
+		var styleSvg = {
+			border : '1px #CCC solid',
+			background : '#FFF',
+			margin: '5px auto'
+		}
+		if(!this.state.hookWindowSize){
+			setTimeout(this.hookWindowSize, 200);
+		}
+		if(this.state.loading){
+			this.loadData();
+			return (<div>Loading</div>);
+		}
+		var contents = this.getTables();
+		var transform = 'translate('+this.state.x+', ' + this.state.y + ')';
+		return (<div>
+			<svg width={panel_width} height={panel_height} style={styleSvg} >
+				<g transform={transform} >
+					{contents}
+				</g>
+			</svg>
+		</div>);
 	}
 });

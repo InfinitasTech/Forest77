@@ -11,12 +11,21 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160813193439) do
+ActiveRecord::Schema.define(version: 20160814160337) do
+
+  create_table "project_db_versions", force: :cascade do |t|
+    t.integer  "project_id"
+    t.integer  "version_db"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
 
   create_table "project_headers", force: :cascade do |t|
     t.string   "name"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.integer  "version_db",   default: 0
+    t.integer  "version_init", default: 0
+    t.datetime "created_at",               null: false
+    t.datetime "updated_at",               null: false
   end
 
   add_index "project_headers", ["name"], name: "index_project_headers_on_name"
@@ -29,6 +38,19 @@ ActiveRecord::Schema.define(version: 20160813193439) do
   end
 
   add_index "system_settings", ["name"], name: "index_system_settings_on_name"
+
+  create_table "table_headers", force: :cascade do |t|
+    t.integer  "project_id"
+    t.string   "name"
+    t.string   "ttype"
+    t.string   "value"
+    t.integer  "x",          default: 10
+    t.integer  "y",          default: 10
+    t.datetime "created_at",              null: false
+    t.datetime "updated_at",              null: false
+  end
+
+  add_index "table_headers", ["project_id"], name: "index_table_headers_on_project_id"
 
   create_table "users", force: :cascade do |t|
     t.string   "name",       default: "No Name"

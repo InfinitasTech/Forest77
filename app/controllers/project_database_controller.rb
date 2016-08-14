@@ -8,9 +8,19 @@ class ProjectDatabaseController < ApplicationController
 	end
 
 	def create_table
+		unless params[:name].present? then
+			flash[:emsg] = 'Please fill name'
+			redirect_to :action=>:index
+			return			
+		end
+		record = TableHeader.new
+		record.name = params[:name]
+		record.project_id = @project.id
 		
+		record.save
+		flash[:msg] = 'Table create success'
+		redirect_to :action=>:index
 	end
-
 
 	def project_select
 		@project = ProjectHeader.find_by_id(params[:id])
@@ -26,6 +36,14 @@ class ProjectDatabaseController < ApplicationController
 		end
 		session[:project_id] = @project.id
 		redirect_to :action=>:index
+	end
+
+	def api_load_table
+		records = TableHeader.where(:project_id=>@project.id)
+		render :json => {
+			:status => 0,
+			:records => records
+		}
 	end
 
 protected

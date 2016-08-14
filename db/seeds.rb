@@ -12,7 +12,7 @@ end
 
 def createAdmin()
 	if User.where(:account=>'admin').first.present? then
-		msg('Admin already exists')
+		msg('Admin already exists.')
 		return 
 	end
 	user = User.new
@@ -22,6 +22,7 @@ def createAdmin()
     user.password = User.sha256('admin' + user.challenge)
     user.name = 'admin'
     user.save
+    msg 'Create Admin user.'
 end
 
 createAdmin
