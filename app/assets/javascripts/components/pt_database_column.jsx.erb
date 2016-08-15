@@ -7,16 +7,17 @@ var PT_Database_Column = React.createClass({
 		}
 		var style_line = {
 			stroke: 'rgb(64, 64, 64)',
-			strokeWith: '3'
+			strokeWidth: '2'
 		};
+		var height = this.props.height / 2;
 		var key = 'link_' + this.props.data.id +'_to_' + this.props.data.name
 		table.notifyChanges[key] = this;
 		return (<line 
 			key = {key}
-			x1={0}
-			y1={0}
-			x2={table.state.x + table.width - this.props.tx}
-			y2={table.state.y - this.props.ty}
+			x1={-3}
+			y1={height}
+			x2={table.state.x + table.width - this.props.tx - 3}
+			y2={table.state.y - this.props.ty + height}
 			style={style_line} />);
 	},
 	render: function(){
@@ -32,7 +33,7 @@ var PT_Database_Column = React.createClass({
 			height : this.props.height - 4,
 			fill: 'rgb(240, 255, 255)',
 			stroke: 'rgb(64, 64, 64)',
-			strokeWith: '1'
+			strokeWidth: '1'
 		}
 
 		var line = this.createLineIfNeed();
