@@ -69,10 +69,13 @@ class ProjectDatabaseController < ApplicationController
 
 	def api_load_table
 		records = TableHeader.where(:project_id=>@project.id)
-		render :json => {
+		records.each{|record|
+			record.id_key_name = record.name.underscore + '_id'
+		}
+		render :json => ({
 			:status => 0,
 			:records => records
-		}
+		}.to_json :methods => [:id_key_name])
 	end
 
 	def api_save_table_position

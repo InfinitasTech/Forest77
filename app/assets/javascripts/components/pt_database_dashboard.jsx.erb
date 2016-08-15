@@ -1,6 +1,7 @@
 var panelHandleMouseMove = false, panelHandleMouseUp = false;
-
+var tablePanel = false;
 var tableBoxes = [];
+var tableKeyLinkDict = {};
 
 var PT_Database_Dashboard = React.createClass({
 	getInitialState: function(){
@@ -17,7 +18,7 @@ var PT_Database_Dashboard = React.createClass({
 			x: 0,
 			y: 0,
 			can_edit: true,
-			show_db_version : true
+			show_db_version : false
 		}
 	},
 	hookWindowSize : function(){
@@ -113,6 +114,7 @@ var PT_Database_Dashboard = React.createClass({
 			setTimeout(this.hookWindowSize, 200);
 		}
 		if(this.state.loading){
+			tablePanel = this;
 			this.loadData();
 			return (<div>Loading</div>);
 		}

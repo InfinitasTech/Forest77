@@ -1,10 +1,27 @@
 
 var PT_Database_Column = React.createClass({
 	createLineIfNeed : function(){
-		return false;
-	}
+		var table = tableKeyLinkDict[this.props.data.name];
+		if(!table){
+			return false;
+		}
+		var style_line = {
+			stroke: 'rgb(64, 64, 64)',
+			strokeWith: '3'
+		};
+		var key = 'link_' + this.props.data.id +'_to_' + this.props.data.name
+		table.notifyChanges[key] = this;
+		return (<line 
+			key = {key}
+			x1={0}
+			y1={0}
+			x2={table.state.x + table.width - this.props.tx}
+			y2={table.state.y - this.props.ty}
+			style={style_line} />);
+	},
 	render: function(){
 		var offset = this.props.height * this.props.index;
+		this.offset = offset;
 		var transform = 'translate(0, ' + offset + ')';
 
 		var y_text_offset = 16, x_text_offset = 4;
