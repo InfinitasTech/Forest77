@@ -65,6 +65,10 @@ var PT_Database_TableBox = React.createClass({
 
 	},
 	handleSavePosition : function(){
+		if(!this.needSavePosition){
+			return;
+		}
+		this.needSavePosition = false;
 		apiCall(api_save_table_position, {
 			table_id : this.props.data.id,
 			x: this.state.x,

@@ -2,6 +2,12 @@
 <h1>Project: <%=@project.name%></h1>
 
 <a class="btn btn-default" data-toggle="modal" data-target="#modal_create_table" >Create Table</a>
+
+<span class="btn-group" >
+  <a class="btn btn-default" id="btn_full_screen" >Full Screen</a>
+  <a class="btn btn-default" id="btn_toggle_edit_mode" >Toggle Edit Mode</a>
+</span>
+
 <hr />
 <script type="text/javascript">
 var project_id = <%=@project.id%>;
@@ -12,6 +18,20 @@ var api_save_table_position = "<%=url_for :action=>:api_save_table_position %>";
 var url_icon_move = '<%= asset_path 'ic_open_with_black_24dp_2x.png' %>';
 var url_icon_edit = '<%= asset_path 'ic_create_black_24dp_2x'%>';
 var url_icon_add = '<%= asset_path 'ic_add_black_24dp_2x.png'%>';
+
+$('#btn_full_screen').click(function(){
+  tablePanel.setState({
+    height : $(window).height()
+  });
+});
+
+$('#btn_toggle_edit_mode').click(function(){
+  var can_edit = ! tablePanel.state.can_edit;
+  tablePanel.setState({
+    can_edit : can_edit,
+    loading : true
+  });
+});
 </script>
 <%= react_component('PT_Database_Dashboard' ) %>
 

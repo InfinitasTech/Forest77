@@ -8,7 +8,7 @@ var PT_Database_Dashboard = React.createClass({
 		$(window).resize(this.onWindowSizeChange);
 		$(window).keydown(this.handleKeydown);
 		$(window).keyup(this.handleKeyup);
-		taskPanel = this;
+		tablePanel = this;
 
 		return {
 			hookWindowSize : false,
@@ -36,6 +36,10 @@ var PT_Database_Dashboard = React.createClass({
 		apiCall(api_load_table, {
 			uuid : uuid()
 		}, function(resp){
+			if( ! this.state.can_edit){ 
+				this.inDragMode = true;
+			};
+
 			this.setState({
 				records : resp.records,
 				loading: false
@@ -90,7 +94,7 @@ var PT_Database_Dashboard = React.createClass({
 		// panelHandleMouseMove = false;
 	},
 	handleKeydown : function(e){
-		if(!this.state.can_edit){ return; }
+		if( ! this.state.can_edit){ return; }
 		var code = event.which || event.keyCode;
 		if(code==32){
 			$('#svg_task_panel').css('cursor', 'move');
@@ -110,11 +114,15 @@ var PT_Database_Dashboard = React.createClass({
 			background : '#FFF',
 			margin: '5px auto'
 		}
+
+		if(this.inDragMode){
+			styleSvg.cursor = 'move';
+		}
+
 		if(!this.state.hookWindowSize){
 			setTimeout(this.hookWindowSize, 200);
 		}
 		if(this.state.loading){
-			tablePanel = this;
 			this.loadData();
 			return (<div>Loading</div>);
 		}
