@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160814160337) do
+ActiveRecord::Schema.define(version: 20160815154716) do
 
   create_table "project_db_versions", force: :cascade do |t|
     t.integer  "project_id"
@@ -39,11 +39,24 @@ ActiveRecord::Schema.define(version: 20160814160337) do
 
   add_index "system_settings", ["name"], name: "index_system_settings_on_name"
 
+  create_table "table_columns", force: :cascade do |t|
+    t.string   "name"
+    t.string   "ttype"
+    t.string   "desc"
+    t.string   "value"
+    t.string   "ext_value"
+    t.integer  "version_db"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "table_headers", force: :cascade do |t|
     t.integer  "project_id"
     t.string   "name"
     t.string   "ttype"
     t.string   "value"
+    t.string   "desc"
+    t.integer  "version_db"
     t.integer  "x",          default: 10
     t.integer  "y",          default: 10
     t.datetime "created_at",              null: false

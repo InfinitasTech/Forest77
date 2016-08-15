@@ -16,9 +16,38 @@ class ProjectDatabaseController < ApplicationController
 		record = TableHeader.new
 		record.name = params[:name]
 		record.project_id = @project.id
-		
+		record.version_db = @project.version_db
 		record.save
+
+		# create column
+		column = TableColumn.new
+		column.version_db = @project.version_db
+		column.table_id = record.id
+		column.name = 'id'
+		column.ttype = TableHeader::TYPE_INTEGER
+		column.save!
+
+
 		flash[:msg] = 'Table create success'
+		redirect_to :action=>:index
+	end
+
+	def add_column
+		return unless verify_table_for_api
+		unless params[:name].present? then
+			flash[:emsg] = 'Please fill name'
+			redirect_to :action=>:index
+			return			
+		end
+
+		record = TableColumn.new
+		record.version_db = @project.version_db
+		record.table_id = @table.id
+		record.name = params[:name]
+		record.ttype = params[:ttype]
+		record.save!
+
+		flash[:msg] = 'Column create in "' + @table.name + '" success'
 		redirect_to :action=>:index
 	end
 
@@ -54,6 +83,17 @@ class ProjectDatabaseController < ApplicationController
 
 		render :json => {
 			:status => 0
+		}
+	end
+
+	def api_load_column
+		return unless verify_table_for_api
+
+		records = TableColumn.where(:table_id => @table.id)
+
+		render :json => {
+			:status => 0,
+			:records => records
 		}
 	end
 

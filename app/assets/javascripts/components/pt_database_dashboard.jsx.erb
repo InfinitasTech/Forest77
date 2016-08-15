@@ -1,119 +1,7 @@
 var panelHandleMouseMove = false, panelHandleMouseUp = false;
 
+var tableBoxes = [];
 
-var PT_Database_TableBox_Btn = React.createClass({
-	render : function(){
-		var style = {
-			fill: 'rgb(240, 240, 255)',
-			width: 10,
-			height: 10,
-			cursor: this.props.cursor || 'pointer'
-		};
-		return (<rect x={this.props.x} y={this.props.y} style={style}
-			onClick={this.props.onClick}
-			onMouseDown={this.props.onMouseDown}
-			onMouseMove={this.props.onMouseMove}
-			onMouseUp={this.props.onMouseUp}
-			onMouseOut={this.props.onMouseOut}
-			></rect>);
-	}
-});
-
-var PT_Database_TableBox = React.createClass({
-	getInitialState : function(){
-		return {
-			canEdit : this.props.canEdit || false,
-			loading : true,
-			inDragMode: false,
-			savePosition : false,
-			x : this.props.data.x || 0,
-			y : this.props.data.y || 0
-		};
-	},
-	loadData : function(){
-
-	},
-	handleMouseMove : function(e){
-		if(! this.inDragMode){
-			return
-		}
-		var diffX = e.pageX - this.actionX;
-		this.actionX = e.pageX;
-		if(diffX!=0){
-			var x = this.state.x + diffX;
-			this.setState({ x : x})
-		}
-		var diffY = e.pageY - this.actionY;
-		this.actionY = e.pageY;
-		if(diffY!=0){
-			var y = this.state.y + diffY;
-			this.setState({ y : y})
-		}
-	},
-	handleMouseDown : function(e){
-		this.inDragMode = true;
-		this.actionX = e.pageX;
-		this.actionY = e.pageY;
-	},
-	handleMouseUp : function(e){
-		this.inDragMode = false;
-		panelHandleMouseMove = false;
-		this.needSavePosition = true;
-		this.setState({
-			savePosition : true
-		})
-	},
-	handleMouseOut : function(e){
-		panelHandleMouseMove = this.handleMouseMove;
-	},
-	handleNewColumnClick : function(e){
-		var data = this.props.data
-		var modal = $('#modal_table_column');
-		modal.find('.modal-title').text('New Column');
-		modal.find('[name=table_id]').val(data.id);
-		modal.modal('show');
-	},
-	handleSavePosition : function(){
-		apiCall(api_save_table_position, {
-			table_id : this.props.data.id,
-			x: this.state.x,
-			y: this.state.y
-		}, function(resp){ });
-	},
-	render : function(){
-		var transform = 'translate('+this.state.x+', ' + this.state.y + ')';
-		var style = {
-			fill: 'rgb(240, 255, 230)',
-			width: 100,
-			height: 100
-		};
-
-		// if(this.state.loading){
-		// 	this.loadData();
-		// 	return (<g transform={transform}>
-		// 		<text y={20} >Loading</text>
-		// 	</g>)
-		// }
-		if(this.state.savePosition){
-			this.handleSavePosition();
-		}
-		return (<g transform={transform}
-				onMouseMove={this.handleMouseMove}
-				onMouseUp={this.handleMouseUp}
-				onMouseOut={this.handleMouseOut}
-				>
-				<rect style={style}></rect>
-				<PT_Database_TableBox_Btn
-					data={this.props.data}
-					x={1} y={1} title="Move" cursor="move"
-					onMouseDown={this.handleMouseDown} />
-				<PT_Database_TableBox_Btn
-					data={this.props.data}
-					x={12} y={1} title="Add"
-					onClick={this.handleNewColumnClick} />
-			</g>)
-	}
-})
 var PT_Database_Dashboard = React.createClass({
 	getInitialState: function(){
 		$(window).resize(this.onWindowSizeChange);
@@ -127,7 +15,9 @@ var PT_Database_Dashboard = React.createClass({
 			height : 600,
 			loading : true,
 			x: 0,
-			y: 0
+			y: 0,
+			can_edit: true,
+			show_db_version : true
 		}
 	},
 	hookWindowSize : function(){
@@ -159,7 +49,8 @@ var PT_Database_Dashboard = React.createClass({
 			var key = 'tabh_k_' + record.id;
 			return (<PT_Database_TableBox data={record}
 				key={key}
-				canEdit={this.props.canEdit}
+				can_edit={this.state.can_edit}
+				show_db_version={this.state.show_db_version}
 				></PT_Database_TableBox>);
 		}.bind(this));
 	},
@@ -198,7 +89,7 @@ var PT_Database_Dashboard = React.createClass({
 		// panelHandleMouseMove = false;
 	},
 	handleKeydown : function(e){
-		if(!this.state.canEdit){ return; }
+		if(!this.state.can_edit){ return; }
 		var code = event.which || event.keyCode;
 		if(code==32){
 			$('#svg_task_panel').css('cursor', 'move');
@@ -206,7 +97,7 @@ var PT_Database_Dashboard = React.createClass({
 		}
 	},
 	handleKeyup : function(e){
-		if(!this.state.canEdit){ return; }
+		if(!this.state.can_edit){ return; }
 		this.inDragMode = false;
 		$('#svg_task_panel').css('cursor', '');
 	},

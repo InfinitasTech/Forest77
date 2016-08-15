@@ -46,6 +46,10 @@ function apiCall(url, data, onSuccess, sender){
 	})	
 }
 
+function measureTextWidth(text){
+	return text.length * 7.5 + 5
+}
+
 function guid() {
   function s4() {
     return Math.floor((1 + Math.random()) * 0x10000)

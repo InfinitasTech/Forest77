@@ -6,7 +6,12 @@
 <script type="text/javascript">
 var project_id = <%=@project.id%>;
 var api_load_table = "<%=url_for :action=>:api_load_table %>";
+var api_load_column = "<%=url_for :action=>:api_load_column %>";
 var api_save_table_position = "<%=url_for :action=>:api_save_table_position %>";
+
+var url_icon_move = '<%= asset_path 'ic_open_with_black_24dp_2x.png' %>';
+var url_icon_edit = '<%= asset_path 'ic_create_black_24dp_2x'%>';
+var url_icon_add = '<%= asset_path 'ic_add_black_24dp_2x.png'%>';
 </script>
 <%= react_component('PT_Database_Dashboard' ) %>
 
@@ -39,10 +44,21 @@ var api_save_table_position = "<%=url_for :action=>:api_save_table_position %>";
         <h4 class="modal-title">Column</h4>
       </div>
       <div class="modal-body">
-        <%=form_tag (url_for :action=>:create_table) do %>
-          <input type="text" name="name" value="" />
-          <input type="text" name="table_id" value="" />
-          <input type="submit" class="btn btn-default" />
+        <%=form_tag (url_for :action=>:add_column ) do %>
+        	<label >Name</label>
+        	<div class="input-group" >
+				<input class="form-control" type="text" name="name" value="" />
+			</div>
+			<label >Type</label>
+			<div class="input-group" >
+				<select class="form-control" name="ttype" >
+					<% TableHeader.columnTypeList.each do |type| %>
+						<option value="<%=type%>" ><%=type%></option>
+					<% end %>
+				</select>
+			</div>
+			<input type="hidden" name="table_id" value="" />
+			<input type="submit" class="btn btn-default" />
         <% end %>
       </div>
     </div>

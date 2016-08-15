@@ -1,0 +1,29 @@
+
+var PT_Database_Column = React.createClass({
+	createLineIfNeed : function(){
+		return false;
+	}
+	render: function(){
+		var offset = this.props.height * this.props.index;
+		var transform = 'translate(0, ' + offset + ')';
+
+		var y_text_offset = 16, x_text_offset = 4;
+		var x_type = this.props.width - measureTextWidth(this.props.data.ttype);
+
+		var style_box = {
+			width : this.props.width - 10,
+			height : this.props.height - 4,
+			fill: 'rgb(240, 255, 255)',
+			stroke: 'rgb(64, 64, 64)',
+			strokeWith: '1'
+		}
+
+		var line = this.createLineIfNeed();
+		return (<g transform={transform} >
+			{line}
+			<rect style={style_box} ></rect>
+			<text x={x_text_offset} y={y_text_offset} >{this.props.data.name}</text>
+			<text x={x_type} y={y_text_offset} >{this.props.data.ttype}</text>
+		</g>);
+	}
+});

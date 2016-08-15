@@ -5,8 +5,13 @@ class CreateTableHeaders < ActiveRecord::Migration
     	t.string :name
     	t.string :ttype
     	t.string :value
+        t.string :desc
+
+        t.integer :version_db
+
     	t.integer :x, :default=>10
     	t.integer :y, :default=>10
+
 		t.timestamps null: false
     end
   end

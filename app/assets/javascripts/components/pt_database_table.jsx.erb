@@ -1,0 +1,228 @@
+var PT_Database_TableBox = React.createClass({
+	getInitialState : function(){
+		return {
+			can_edit : this.props.can_edit || false,
+			show_db_version : this.props.show_db_version || false,
+			loading : true,
+			inDragMode: false,
+			savePosition : false,
+			x : this.props.data.x || 0,
+			y : this.props.data.y || 0
+		};
+	},
+	loadData : function(){
+		apiCall(api_load_column, {
+			table_id : this.props.data.id
+		}, function(resp){
+			this.setState({
+				loading : false,
+				columns : resp.records
+			});
+		}, this);
+	},
+	handleMouseMove : function(e){
+		if(! this.inDragMode){
+			return
+		}
+		var diffX = e.pageX - this.actionX;
+		this.actionX = e.pageX;
+		if(diffX!=0){
+			var x = this.state.x + diffX;
+			this.setState({ x : x})
+		}
+		var diffY = e.pageY - this.actionY;
+		this.actionY = e.pageY;
+		if(diffY!=0){
+			var y = this.state.y + diffY;
+			this.setState({ y : y})
+		}
+	},
+	handleMouseDown : function(e){
+		this.inDragMode = true;
+		this.actionX = e.pageX;
+		this.actionY = e.pageY;
+	},
+	handleMouseUp : function(e){
+		this.inDragMode = false;
+		panelHandleMouseMove = false;
+		this.needSavePosition = true;
+		this.setState({
+			savePosition : true
+		})
+	},
+	handleMouseOut : function(e){
+		panelHandleMouseMove = this.handleMouseMove;
+	},
+	handleNewColumnClick : function(e){
+		var data = this.props.data
+		var modal = $('#modal_table_column');
+		modal.find('.modal-title').text('New Column');
+		modal.find('[name=table_id]').val(data.id);
+		modal.modal('show');
+	},
+	handleEditTableClick : function(e){
+
+	},
+	handleSavePosition : function(){
+		apiCall(api_save_table_position, {
+			table_id : this.props.data.id,
+			x: this.state.x,
+			y: this.state.y
+		}, function(resp){ });
+	},
+	getColumns : function(_width){
+		var width = _width, height = 0;
+		var cheight = 27;
+
+		// get width
+		this.state.columns.map(function(record){
+			var cwidth = measureTextWidth(
+				record.name + " / " + record.type
+			)
+			if(cwidth > width){ width = cwidth }
+			return record;
+		}.bind(this));
+
+		// create columns
+		var index = 0;
+		var columns = this.state.columns.map(function(record){
+			height += cheight;
+			var key = "dc_ke_" + record.id;
+			return (<PT_Database_Column
+				key={key}
+				index={index++}
+				height={cheight}
+				width={width}
+				data={record} table={this.props.data} />)
+		}.bind(this));
+
+		return {
+			width : width,
+			height : height,
+			columns : columns
+		}
+	},
+	render : function(){
+		var base_height = 29;
+		var transform = 'translate('+this.state.x+', ' + this.state.y + ')';
+		var style = {
+			fill: 'rgb(240, 255, 230)',
+			width: this.state.width || 100,
+			height: this.state.width || 100,
+			stroke: 'rgb(64, 64, 64)',
+			strokeWith: '1'
+		};
+
+		if(this.state.loading){
+			if(tableBoxes.indexOf(this)==-1){
+				tableBoxes.push(this);
+			}
+			this.loadData();
+			return (<g transform={transform}>
+				<text y={20} >Loading</text>
+			</g>)
+		}
+		if(this.state.savePosition){
+			this.handleSavePosition();
+		}
+
+		// prepare name ( title)
+		var name = this.props.data.name;
+		if(this.state.show_db_version){
+			name += " [" + this.props.data.version_db + "]";
+		}
+		var text_title = (<text
+			y={17} x={6} >{name}</text>)
+
+		// create column
+		var columns = this.getColumns(measureTextWidth(name));
+		style.width = columns.width;
+		style.height = columns.height + base_height + 4;
+
+		// cal width by name 
+		var calWidth = measureTextWidth(name);
+		if(calWidth > style.width ){
+			style.width = calWidth;
+		}
+
+		// prepare control bar
+		var control_bar = [];
+		if(this.state.can_edit){
+			control_bar = [
+				(<PT_Database_TableBox_Btn
+					data={this.props.data}
+					key={this.props.data.id + "_cb_move"}
+					x={1} y={-20} title="Move" cursor="move"
+					width={20} height={20} icon={url_icon_move}
+					onMouseDown={this.handleMouseDown} />),
+				(<PT_Database_TableBox_Btn
+					data={this.props.data}
+					key={this.props.data.id + "_cb_edit"}
+					x={22} y={-20} title="Edit"
+					width={20} height={20} icon={url_icon_edit}
+					onClick={this.handleEditTableClick} />),
+				(<PT_Database_TableBox_Btn
+					data={this.props.data}
+					key={this.props.data.id + "_cb_add"}
+					x={43} y={-20} title="Add"
+					width={20} height={20} icon={url_icon_add}
+					onClick={this.handleNewColumnClick} />),
+			]
+		}
+
+		var transform_column = 'translate(3, ' + base_height + ')';
+		return (<g transform={transform}
+				onMouseMove={this.handleMouseMove}
+				onMouseUp={this.handleMouseUp}
+				onMouseOut={this.handleMouseOut}
+				>
+				<rect style={style}></rect>
+				{text_title}
+				{control_bar}
+				<g transform={transform_column}>
+					{columns.columns}
+				</g>
+			</g>)
+	}
+})
+
+
+var PT_Database_TableBox_Btn = React.createClass({
+	render : function(){
+		var styleG = {
+			cursor: this.props.cursor || 'pointer'
+		};
+		var content = false;
+		if(this.props.icon){
+			var style = {
+				fill: 'rgb(240, 240, 240)',
+				width: this.props.width || 50,
+				height: this.props.height || 50,
+				stroke: 'rgb(128, 128, 128)',
+				strokeWith: '1'
+			};
+			content = (<g>
+				<rect x={this.props.x} y={this.props.y} style={style} ></rect>
+				<image
+					xlinkHref={this.props.icon}
+					x={this.props.x} y={this.props.y}
+					width={this.props.width} height={this.props.height} />
+					</g>);
+		}else{
+			var style = {
+				fill: 'rgb(240, 240, 255)',
+				width: this.props.width || 50,
+				height: this.props.height || 50,
+			};
+			content = (<rect x={this.props.x} y={this.props.y} style={style} ></rect>);
+		}
+		return (<g
+			style={styleG}
+			onClick={this.props.onClick}
+			onMouseDown={this.props.onMouseDown}
+			onMouseMove={this.props.onMouseMove}
+			onMouseUp={this.props.onMouseUp}
+			onMouseOut={this.props.onMouseOut}
+			>{content}</g>);
+	}
+});
