@@ -16,13 +16,23 @@ var PT_Database_Column = React.createClass({
 			tableWidth = table.width;
 		}
 		table.notifyChanges[key] = this;
-		return (<line 
-			key = {key}
-			x1={-3}
-			y1={height}
-			x2={table.state.x - this.props.tx + tableWidth - 3}
-			y2={table.state.y - this.props.ty - this.offset + height}
-			style={style_line} />);
+		if(this.props.tx > table.state.x ){
+			return (<line 
+				key = {key}
+				x1={-3}
+				y1={height}
+				x2={table.state.x - this.props.tx + tableWidth - 3}
+				y2={table.state.y - this.props.ty - this.offset + height}
+				style={style_line} />);
+		}else{
+			return (<line 
+				key = {key}
+				x1={this.props.width}
+				y1={height}
+				x2={table.state.x - this.props.tx - 3}
+				y2={table.state.y - this.props.ty - this.offset + height}
+				style={style_line} />);
+		}
 	},
 	render: function(){
 		var offset = this.props.height * this.props.index;

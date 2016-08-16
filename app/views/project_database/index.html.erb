@@ -33,9 +33,14 @@ $('#btn_toggle_edit_mode').click(function(){
   });
 });
 </script>
-<%= react_component('PT_Database_Dashboard' ) %>
+<%= react_component('PT_Database_Dashboard', {}, { :id=>'DatabaseDashboard'} ) %>
 
 </section>
+
+<script type="text/javascript">
+var tablePanelDOM = $('#DatabaseDashboard');
+tablePanelDOM.disableSelection();
+</script>
 
 
 

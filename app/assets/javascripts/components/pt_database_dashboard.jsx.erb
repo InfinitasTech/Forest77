@@ -1,5 +1,6 @@
 var panelHandleMouseMove = false, panelHandleMouseUp = false;
 var tablePanel = false;
+var dragTable;
 var tableBoxes = [];
 var tableKeyLinkDict = {};
 
@@ -38,7 +39,9 @@ var PT_Database_Dashboard = React.createClass({
 		}, function(resp){
 			if( ! this.state.can_edit){ 
 				this.inDragMode = true;
-			};
+			}else{
+				this.inDragMode = false;
+			}
 
 			this.setState({
 				records : resp.records,
@@ -97,14 +100,14 @@ var PT_Database_Dashboard = React.createClass({
 		if( ! this.state.can_edit){ return; }
 		var code = event.which || event.keyCode;
 		if(code==32){
-			$('#svg_task_panel').css('cursor', 'move');
+			tablePanelDOM.css('cursor', 'move');
 			this.inDragMode = true;
 		}
 	},
 	handleKeyup : function(e){
 		if(!this.state.can_edit){ return; }
 		this.inDragMode = false;
-		$('#svg_task_panel').css('cursor', '');
+		tablePanelDOM.css('cursor', '');
 	},
 	render: function(){
 		var panel_width = this.state.width;
@@ -115,10 +118,6 @@ var PT_Database_Dashboard = React.createClass({
 			margin: '5px auto'
 		}
 
-		if(this.inDragMode){
-			styleSvg.cursor = 'move';
-		}
-
 		if(!this.state.hookWindowSize){
 			setTimeout(this.hookWindowSize, 200);
 		}
@@ -126,6 +125,13 @@ var PT_Database_Dashboard = React.createClass({
 			this.loadData();
 			return (<div>Loading</div>);
 		}
+
+		if(this.inDragMode){
+			tablePanelDOM.css('cursor', 'move');
+		}else{
+			tablePanelDOM.css('cursor', '');
+		}
+
 		var contents = this.getTables();
 		var transform = 'translate('+this.state.x+', ' + this.state.y + ')';
 		return (<div>
