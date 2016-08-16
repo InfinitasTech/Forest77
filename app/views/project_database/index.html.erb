@@ -8,6 +8,8 @@
   <a class="btn btn-default" id="btn_toggle_edit_mode" >Toggle Edit Mode</a>
 </span>
 
+<a class="btn btn-default" href="<%=url_for :action=>:show_tables %>" >Show Tables</a>
+
 <hr />
 <script type="text/javascript">
 var project_id = <%=@project.id%>;
@@ -37,13 +39,6 @@ $('#btn_toggle_edit_mode').click(function(){
 
 </section>
 
-<script type="text/javascript">
-var tablePanelDOM = $('#DatabaseDashboard');
-tablePanelDOM.disableSelection();
-</script>
-
-
-
 <div class="modal fade" role="dialog" id="modal_create_table">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -69,23 +64,55 @@ tablePanelDOM.disableSelection();
         <h4 class="modal-title">Column</h4>
       </div>
       <div class="modal-body">
-        <%=form_tag (url_for :action=>:add_column ) do %>
+        <%=form_tag (url_for :action=>:add_column), :id=>'form_column' do %>
         	<label >Name</label>
         	<div class="input-group" >
-				<input class="form-control" type="text" name="name" value="" />
-			</div>
-			<label >Type</label>
-			<div class="input-group" >
-				<select class="form-control" name="ttype" >
-					<% TableHeader.columnTypeList.each do |type| %>
-						<option value="<%=type%>" ><%=type%></option>
-					<% end %>
-				</select>
-			</div>
-			<input type="hidden" name="table_id" value="" />
-			<input type="submit" class="btn btn-default" />
+    				<input class="form-control" type="text" name="name" value="" />
+    			</div>
+
+    			<label >Type</label>
+    			<div class="input-group" >
+    				<select class="form-control" name="ttype" >
+    					<% TableHeader.columnTypeList.each do |type| %>
+    						<option value="<%=type%>" ><%=type%></option>
+    					<% end %>
+    				</select>
+    			</div>
+
+          <label >Desc</label>
+          <div class="input-group" >
+            <input class="form-control" type="text" name="desc" value="" />
+          </div>
+
+    			<input type="hidden" name="table_id" value="" />
+          <input type="hidden" name="column_id" value="" />
+          <input type="hidden" name="post_action" value="" />
+          <input type="hidden" class="keep-data" name="back_x" value="" />
+          <input type="hidden" class="keep-data" name="back_y" value="" />
+          <input type="submit" class="btn btn-success keep-data" /  >
+
+          <div class="exists_control" style="margin-top:20px;" >
+              <a class="btn btn-danger" id="delete_column">Delete</a>
+          </div>
         <% end %>
       </div>
     </div>
   </div>
 </div>
+
+<script type="text/javascript">
+var tablePanelDOM = $('#DatabaseDashboard');
+tablePanelDOM.disableSelection();
+
+var back_y = $('[name=back_y]');
+var back_x = $('[name=back_x]');
+
+$('#delete_column').click(function(){
+  if(!confirm('Sure Delete?')){
+    return;
+  }
+  var form = $('#form_column');
+  form.find('[name=post_action]').val('delete_column');
+  form.submit();
+});
+</script>

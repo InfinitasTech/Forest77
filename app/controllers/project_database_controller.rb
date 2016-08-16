@@ -32,6 +32,16 @@ class ProjectDatabaseController < ApplicationController
 		redirect_to :action=>:index
 	end
 
+	def show_tables
+		@records = TableHeader.where( :project_id => @project.id ).map{|table|
+			{
+				:name => table.name,
+				:columns => TableColumn.where( :table_id=>table.id)
+			}
+		}
+
+	end
+
 	def add_column
 		return unless verify_table_for_api
 		unless params[:name].present? then
@@ -40,15 +50,33 @@ class ProjectDatabaseController < ApplicationController
 			return			
 		end
 
-		record = TableColumn.new
+		action = 'create';
+		if (params[:column_id].present?) then
+			record = TableColumn.find_by_id(params[:column_id])
+			if (record.present?) then
+				unless record.table_id == @table.id then
+					flash[:emsg] = 'Wrong column'
+					redirect_to :action=>:index
+				end
+				if params[:post_action] == 'delete_column' then
+					record.delete
+					redirect_to :action=>:index
+					return
+				end
+				action = 'edit'
+			end
+		end
+
+		record = TableColumn.new unless record.present?
 		record.version_db = @project.version_db
 		record.table_id = @table.id
 		record.name = params[:name]
 		record.ttype = params[:ttype]
+		record.desc = params[:desc]
 		record.save!
 
-		flash[:msg] = 'Column create in "' + @table.name + '" success'
-		redirect_to :action=>:index
+		flash[:msg] = 'Column ' + action + ' in "' + @table.name + '" success'
+		redirect_to :action=>:index, :anchor=>'{"x":375,"y":83}'.html_safe
 	end
 
 	def project_select

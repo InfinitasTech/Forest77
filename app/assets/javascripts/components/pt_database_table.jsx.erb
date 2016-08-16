@@ -75,8 +75,13 @@ var PT_Database_TableBox = React.createClass({
 	handleNewColumnClick : function(e){
 		var data = this.props.data
 		var modal = $('#modal_table_column');
+		modal.find('input').each(function(){
+			if($(this).has('.keep-data')){ return; }
+			$(this).val('');
+		});
 		modal.find('.modal-title').text('New Column');
 		modal.find('[name=table_id]').val(data.id);
+		modal.find('.exists_control').hide();
 		modal.modal('show');
 	},
 	handleEditTableClick : function(e){
@@ -117,6 +122,7 @@ var PT_Database_TableBox = React.createClass({
 				tx={this.state.x} ty={this.state.y}
 				height={cheight}
 				width={width}
+				can_edit={this.props.can_edit}
 				data={record} table={this.props.data} />)
 		}.bind(this));
 

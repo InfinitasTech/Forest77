@@ -1,0 +1,17 @@
+<section>
+	<a href="<%=url_for :action=>:index %>" class="btn btn-default">Back</a>
+	<% @records.each do |table| %>
+		<div style="border:1px #CCC solid; padding:5px; margin:5px;">
+			<h2><%=table[:name]%></h2>
+			<table class="table">
+				<% table[:columns].each do |column| %>
+				<tr>
+					<td width="30%"><%=column.name%></td>
+					<td width="10%"><%=column.ttype%></td>
+					<td><%=column.desc%></td>
+				</tr>
+				<% end %>
+			</table>
+		</div>
+	<% end %>
+</section>

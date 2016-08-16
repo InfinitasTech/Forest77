@@ -1,5 +1,15 @@
 
 var PT_Database_Column = React.createClass({
+	getInitialState : function(){
+		var can_edit = this.props.can_edit;
+		if(this.props.data.name=='id'){
+			can_edit = false;
+		}
+		return {
+			showControlBar : false,
+			can_edit : can_edit
+		};
+	},
 	createLineIfNeed : function(){
 		var table = tableKeyLinkDict[this.props.data.name];
 		if( ! table){
@@ -34,6 +44,43 @@ var PT_Database_Column = React.createClass({
 				style={style_line} />);
 		}
 	},
+	handleMouseOver : function(e){
+		this.setState({
+			showControlBar : true
+		});
+	},
+	handleMouseOut : function(e){
+		this.setState({
+			showControlBar : false
+		});
+	},
+	handleEditClick : function(e){
+		if(! this.state.can_edit){
+			return;
+		}
+		var data = this.props.data;
+		var table = this.props.table;
+		var modal = $('#modal_table_column');
+		modal.find('.modal-title').text('New Column');
+		modal.find('[name=table_id]').val(table.id);
+		for(key in data){
+			modal.find('[name=' + key + ']').val(data[key]);
+		}
+		modal.find('[name=column_id]').val(data.id);
+		modal.find('.exists_control').show();
+		modal.modal('show');
+	},
+	createControlBar : function(){
+		if(this.state.can_edit && this.state.showControlBar){
+			return <PT_Database_TableBox_Btn
+					data={this.props.data}
+					key={this.props.data.id + "_cccb_edit"}
+					x={-22} y={2} title="Edit"
+					width={20} height={20} icon={url_icon_edit}
+					onClick={this.handleEditClick} />
+		}
+		return false;
+	},
 	render: function(){
 		var offset = this.props.height * this.props.index;
 		this.offset = offset;
@@ -50,12 +97,25 @@ var PT_Database_Column = React.createClass({
 			strokeWidth: '1'
 		}
 
+		if(this.state.showControlBar){
+			style_box.cursor = 'pointer';
+			style_box.fill = 'rgb(255, 255, 245)'
+		}else{
+			style_box.cursor = '';
+		}
+
+		var controlBars = this.createControlBar();
+
 		var line = this.createLineIfNeed();
-		return (<g transform={transform} >
+		return (<g transform={transform} 
+			onMouseOver={this.handleMouseOver}
+			onClick={this.handleEditClick}
+			onMouseOut={this.handleMouseOut} >
 			{line}
 			<rect style={style_box} ></rect>
 			<text x={x_text_offset} y={y_text_offset} >{this.props.data.name}</text>
 			<text x={x_type} y={y_text_offset} >{this.props.data.ttype}</text>
+			{controlBars}
 		</g>);
 	}
 });

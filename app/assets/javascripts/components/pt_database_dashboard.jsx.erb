@@ -11,13 +11,18 @@ var PT_Database_Dashboard = React.createClass({
 		$(window).keyup(this.handleKeyup);
 		tablePanel = this;
 
+
+		var urlHash = getURLHash();
+		var x = urlHash.x;
+		var y = urlHash.y;
+
 		return {
 			hookWindowSize : false,
 			width : $('#page_body').width() - 38,
 			height : 600,
 			loading : true,
-			x: 0,
-			y: 0,
+			x: x || 0,
+			y: y || 0,
 			can_edit: true,
 			show_db_version : false
 		}
@@ -50,7 +55,14 @@ var PT_Database_Dashboard = React.createClass({
 		}, this);
 	},
 	updateURLHash : function(){
-
+		setURLHash({
+			x : this.state.x,
+			y : this.state.y
+		});
+		if(back_x && back_y){
+			back_x.val(this.state.x);
+			back_y.val(this.state.y);
+		}
 	},
 	getTables : function(){
 		return this.state.records.map(function(record){
