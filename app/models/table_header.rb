@@ -6,7 +6,12 @@ class TableHeader < ActiveRecord::Base
 
 	def self.columnTypeList
 		return [
-			'string', TYPE_INTEGER, 'text', 'timestamps'
+			'string', TYPE_INTEGER, 'text',
+			'binary', 'boolean', 'timestamps'
 		]
+	end
+
+	def getTableName
+		return self.name.underscore.tableize
 	end
 end

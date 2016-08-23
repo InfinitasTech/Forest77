@@ -40,12 +40,14 @@ ActiveRecord::Schema.define(version: 20160815154716) do
   add_index "system_settings", ["name"], name: "index_system_settings_on_name"
 
   create_table "table_columns", force: :cascade do |t|
-    t.string   "name"
+    t.integer  "table_id"
+    t.integer  "version_db"
+    t.integer  "torder"
     t.string   "ttype"
+    t.string   "name"
     t.string   "desc"
     t.string   "value"
     t.string   "ext_value"
-    t.integer  "version_db"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end

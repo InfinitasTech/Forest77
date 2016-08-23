@@ -42,6 +42,16 @@ class ProjectDatabaseController < ApplicationController
 
 	end
 
+	def gen_db_migration_laravel
+		@records = TableHeader.where( :project_id => @project.id ).map{|table|
+			{
+				:name => table.name,
+				:table => table,
+				:columns => TableColumn.where( :table_id=>table.id)
+			}
+		}
+	end
+
 	def add_column
 		return unless verify_table_for_api
 		unless params[:name].present? then

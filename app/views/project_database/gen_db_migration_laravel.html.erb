@@ -1,0 +1,15 @@
+<%
+def tab
+	return '&nbsp;&nbsp;&nbsp;&nbsp;'.html_safe
+end
+%>
+<section>
+	<% @records.each do |record| %>
+Schema::create('<%=record[:table].getTableName()%>', function (Blueprint $table) {<br/>
+	<% record[:columns].each do |column| %>
+		<%=tab() + column.getCode('laravel')%><br />
+	<% end %>
+	<%=tab() + TableColumn.endPartCode('laravel')%><br />
+});<br/><br/>
+	<% end %>
+</section>
