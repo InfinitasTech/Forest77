@@ -2,10 +2,12 @@
 
 clone it  
 
-```
+
 rake db:migrate  
+
 rake db:seed  
+
 rails s  
-```
+
 
 then use admin/admin to login  :)
