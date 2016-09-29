@@ -9,6 +9,7 @@
 </span>
 
 <a class="btn btn-default" href="<%=url_for :action=>:show_tables %>" >Show Tables</a>
+<a class="btn btn-default export-png" href="#" >Export PNG</a>
 <a class="btn btn-default" href="<%=url_for :action=>:gen_db_migration_laravel %>" >Generate Laravel DB files</a>
 
 <hr />
@@ -115,5 +116,84 @@ $('#delete_column').click(function(){
   var form = $('#form_column');
   form.find('[name=post_action]').val('delete_column');
   form.submit();
+});
+
+var dx;
+function svg2png(){
+  var svg_data = $('#DatabaseDashboard').find('svg').clone();
+
+  var x = 0;
+  var y = 0;
+  var width = 0;
+  var height = 0;
+  svg_data.find('[transform]').each(function(){
+    var pos = $(this).attr('transform').replace('translate(', '').split(',');
+      var _x = parseInt(pos[0]); var _y = parseInt(pos[1]); 
+      if(_x < x ){ x = _x; }
+      if(_y < y) { y = _y; }
+      var _width = 0, _height = 0;
+      $(this).find('rect').each(function(){
+        var __width = parseInt($(this).css('width'))
+        if(__width > _width){ _width = __width };
+        var __height = parseInt($(this).css('height'))
+        if(__height > _height){ _height = __height };
+
+        var bwidth = this.getBBox().width;
+        var bheight = this.getBBox().bheight;
+        if( bwidth > _width) { _width = bwidth};
+        if( bheight > _height) { _height = bheight};
+      })
+      var bwidth = this.getBBox().width;
+      var bheight = this.getBBox().bheight;
+      var bx = this.getBBox().x;
+      var by = this.getBBox().y;
+      if( bwidth > width) { width = bwidth};
+      if( bheight > height) { height = bheight};
+      if( bx < x ){ x = bx; }
+      if( by < y) { y = by; }
+
+
+      if(_width + _x > width){ width = _width + _x };
+      if(_height + _y > height){ height = _height + _y};
+  } );
+  // console.log(x + ',' + y + '|' + width + ',' + height);
+  var padding = 100;
+  width -= x;
+  height -= y;
+
+  svg_data.find('[transform]:first').attr('transform', 'translate(' + (- x + 20) +','+  (-y + 20 ) +')');
+  svg_data.attr('width', width + padding);
+  svg_data.attr('height', height + padding);
+
+  var target = svg_data[0];
+  // Flatten CSS styles into the SVG
+  for (i = 0; i < target.childNodes.length; i++) {
+    child = target.childNodes[i];
+    var cssStyle = window.getComputedStyle(child);
+    if(cssStyle){
+       child.style.cssText = cssStyle.cssText;
+    }
+  }
+
+  var xml  = new XMLSerializer().serializeToString(target);
+  var data = "data:image/svg+xml;base64," + btoa(xml);
+
+  img  = new Image();
+  var canvas = document.createElement("canvas");
+  canvas.width = width + padding;
+  canvas.height = height + padding;
+  var ctx = canvas.getContext("2d");
+  img.setAttribute('src', data);
+
+  function render(){
+    ctx.drawImage( img, 0, 0 );
+
+    window.open(canvas.toDataURL("image/png"));
+  }
+  setTimeout(render, 500);
+
+}
+$('.export-png').click(function(){
+  svg2png();
 });
 </script>
